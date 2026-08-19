@@ -1,23 +1,23 @@
 {
   "expo": {
-    "name": "Momo Scanner",
-    "slug": "Momo-scanner",
+    "name": "Truck Navigation",
+    "slug": "truck-navigation",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "momoscanner",
+    "scheme": "trucknavigation",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.momoscanner.app",
+      "bundleIdentifier": "com.trucknavigation.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Momo Scanner uses the camera to scan the QR code printed on your oversize/overweight load permit.",
-        "NSLocationWhenInUseUsageDescription": "Momo Scanner uses your location to guide you turn-by-turn along the exact route on your permit and to warn you if you drift off the permitted route.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Momo Scanner uses your location to guide you turn-by-turn along the exact route on your permit and to warn you if you drift off the permitted route."
+        "NSCameraUsageDescription": "Truck Navigation uses the camera to scan the QR code printed on your oversize/overweight load permit.",
+        "NSLocationWhenInUseUsageDescription": "Truck Navigation uses your location to guide you turn-by-turn along the exact route on your permit and to warn you if you drift off the permitted route.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Truck Navigation uses your location to guide you turn-by-turn along the exact route on your permit and to warn you if you drift off the permitted route."
       }
     },
     "android": {
-      "package": "com.momoscanner.app",
+      "package": "com.trucknavigation.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -43,13 +43,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Momo Scanner uses the camera to scan the QR code on your oversize load permit."
+          "cameraPermission": "Truck Navigation uses the camera to scan the QR code on your oversize load permit."
         }
       ],
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Momo Scanner uses your location to navigate you turn-by-turn along the exact permitted route."
+          "locationAlwaysAndWhenInUsePermission": "Truck Navigation uses your location to navigate you turn-by-turn along the exact permitted route."
         }
       ]
     ]

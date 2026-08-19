@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { ParsedPermit, RoutePlan } from "../types/permit";
 
-const HISTORY_KEY = "momo_scanner_permit_history_v1";
+const HISTORY_KEY = "truck_navigation_permit_history_v1";
 const MAX_HISTORY_ENTRIES = 20;
 
 export interface HistoryEntry {

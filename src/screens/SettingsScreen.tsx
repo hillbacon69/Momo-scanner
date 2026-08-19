@@ -31,7 +31,7 @@ export default function SettingsScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.sectionTitle}>HERE Routing API Key</Text>
       <Text style={styles.helperText}>
-        Momo Scanner uses HERE's routing engine to geocode and drive the permit's route (truck
+        Truck Navigation uses HERE's routing engine to geocode and drive the permit's route (truck
         mode, with your load's dimensions applied when known). Create a free key at{" "}
         <Text style={styles.link} onPress={() => Linking.openURL("https://platform.here.com/")}>
           platform.here.com

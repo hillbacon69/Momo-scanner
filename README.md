@@ -1,4 +1,4 @@
-# Momo Scanner
+# Truck Navigation
 
 A mobile app for oversize/overweight load drivers: scan the QR code on a permit,
 review the parsed route, and get real turn-by-turn navigation that follows the

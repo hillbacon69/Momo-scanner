@@ -8,7 +8,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 export default function HomeScreen({ navigation }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Momo Scanner</Text>
+      <Text style={styles.title}>Truck Navigation</Text>
       <Text style={styles.subtitle}>Oversize load permit route navigation</Text>
 
       <View style={styles.disclaimer}>

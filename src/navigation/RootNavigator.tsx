@@ -17,7 +17,7 @@ export default function RootNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Momo Scanner" }} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: "Truck Navigation" }} />
         <Stack.Screen name="Scanner" component={ScannerScreen} options={{ title: "Scan Permit" }} />
         <Stack.Screen
           name="ManualEntry"
