@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "Truck Navigation",
+    "slug": "truck-navigation",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "trucknavigation",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.trucknavigation.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Truck Navigation uses the camera to scan the QR code printed on your oversize/overweight load permit.",
+        "NSLocationWhenInUseUsageDescription": "Truck Navigation uses your location to guide you turn-by-turn along the exact route on your permit and to warn you if you drift off the permitted route.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Truck Navigation uses your location to guide you turn-by-turn along the exact route on your permit and to warn you if you drift off the permitted route."
+      }
+    },
+    "android": {
+      "package": "com.trucknavigation.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "REPLACE_WITH_ANDROID_GOOGLE_MAPS_SDK_KEY"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Truck Navigation uses the camera to scan the QR code on your oversize load permit."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Truck Navigation uses your location to navigate you turn-by-turn along the exact permitted route."
+        }
+      ]
+    ]
+  }
+}
