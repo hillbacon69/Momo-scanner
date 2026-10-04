@@ -52,8 +52,8 @@ const DIRECTION_MAP: Record<string, RouteStep["direction"]> = {
 };
 
 const DISTANCE_WITH_UNIT_PATTERN = /(\d+(?:\.\d+)?)\s*(?:MI\.?|MILES?)\b/i;
-/** Table rows often print a bare leading number with no "mi" suffix, e.g. "4.3   US-80". */
-const LEADING_NUMBER_PATTERN = /^\s*(\d+(?:\.\d+)?)\b/;
+/** Table rows often print a bare leading number with no "mi" suffix, e.g. "4.3   US-80" (TxDMV prints very short legs as "<0.1"). */
+const LEADING_NUMBER_PATTERN = /^\s*<?\s*(\d+(?:\.\d+)?)\b/;
 
 const MILE_MARKER_PATTERN =
   /\bMILE\s?POST\s+(\d+(?:\.\d+)?)\b|\bM\.?P\.?\s*#?\s*(\d+(?:\.\d+)?)\b|\bM\.?M\.?\s*#?\s*(\d+(?:\.\d+)?)\b/i;
@@ -81,6 +81,7 @@ const ACTION_RULES: { pattern: RegExp; action: ManeuverAction }[] = [
   { pattern: /\bKEEP\s+LEFT\b|\bBEAR\s+LEFT\b/i, action: "keep-left" },
   { pattern: /\bKEEP\s+RIGHT\b|\bBEAR\s+RIGHT\b/i, action: "keep-right" },
   { pattern: /\bMERGE\b/i, action: "merge" },
+  { pattern: /\bTAKE\b.*\bRAMP\b/i, action: "exit" },
   { pattern: /\bEXIT\b/i, action: "exit" },
   {
     pattern: /\b(PROCEED|CONTINUE|TRAVEL|GO|CROSS|FOLLOW|STAY\s+ON|REMAIN\s+ON)\b/i,
@@ -329,8 +330,35 @@ function attachContextualRoad(steps: RouteStep[]): RouteStep[] {
   });
 }
 
+/** TxDMV's route table header ("Miles  Route  To  Distance  Est. Time") and its closing line. */
+const ROUTE_TABLE_HEADER_PATTERN = /^MILES\s+ROUTE\s+TO\b/i;
+const ROUTE_TABLE_END_PATTERN = /^FINAL\s+DESTINATION\b/i;
+/** "[Loaded Route Origin: ...]" / "[Loaded Route Destination: ...]" bookend rows - restate the header, not a leg. */
+const LOADED_ROUTE_MARKER_PATTERN = /^\[\s*LOADED\s+ROUTE\s+(ORIGIN|DESTINATION)\b/i;
+
+/**
+ * When the whole permit is pasted, the route table is a small part of the
+ * text - the header's "Origin:"/"Destination:" lines and the numbered
+ * general conditions ("Travel is prohibited on...") also look like route
+ * lines, and since every step with a road becomes a routing waypoint in
+ * order, a leaked "Destination: SL0390" ahead of the table would send the
+ * route to the destination first. If a recognizable route table is present,
+ * only its rows are parsed; otherwise the whole text is (e.g. LA permits,
+ * or a driver pasting just the rows).
+ */
+function scopeToRouteTable(lines: string[]): string[] {
+  const headerIndex = lines.findIndex((line) => ROUTE_TABLE_HEADER_PATTERN.test(line));
+  if (headerIndex === -1) return lines;
+
+  const rows = lines.slice(headerIndex + 1);
+  const endIndex = rows.findIndex((line) => ROUTE_TABLE_END_PATTERN.test(line));
+  return (endIndex === -1 ? rows : rows.slice(0, endIndex)).filter(
+    (line) => !LOADED_ROUTE_MARKER_PATTERN.test(line)
+  );
+}
+
 export function parseRouteSteps(sourceText: string): RouteStep[] {
-  const lines = sourceText
+  const allLines = sourceText
     .split(/\r?\n/)
     .flatMap((line) =>
       // Some permits pack multiple steps into one paragraph separated by
@@ -340,6 +368,7 @@ export function parseRouteSteps(sourceText: string): RouteStep[] {
     )
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
+  const lines = scopeToRouteTable(allLines);
 
   const steps = lines.filter(looksLikeRouteLine).map(classifyStep);
   return attachContextualRoad(steps);
@@ -428,8 +457,13 @@ function extractTruckProfile(text: string): TruckProfile {
   // Try "Axles: 8" (label before number, LA's form) before falling back to
   // "8 AXLES" - the reverse order risks a greedy whitespace match jumping
   // across an unrelated preceding number (e.g. a weight figure).
+  // TxDMV prints an axle table whose header row numbers every axle
+  // ("Axle: 1 2 3 ... 12") - the count is the last number, not the first.
+  const axleNumberRow = text.match(/^\s*AXLE\s*:\s*((?:\d{1,2}\s+)+\d{1,2})\s*$/im);
   const axles = text.match(/\bAXLES?\s*[:=]?\s*(\d+)\b/i) ?? text.match(/\b(\d+)\s*AXLES?\b/i);
-  if (axles) {
+  if (axleNumberRow) {
+    profile.axleCount = Math.max(...axleNumberRow[1].trim().split(/\s+/).map(Number));
+  } else if (axles) {
     profile.axleCount = parseInt(axles[1], 10);
   }
 

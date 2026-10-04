@@ -1,5 +1,6 @@
 import { parsePermitText, parseRouteSteps } from "../src/services/permitParser";
 import { isWaypointCandidate } from "../src/services/geocode";
+import { TX_WELL_SERVICING_PERMIT } from "./fixtures/txWellServicingPermit";
 
 // Transcribed (by hand, from photos) from real Louisiana DOTD and Texas
 // DMV oversize/overweight permit samples. Numbers may not be pixel-exact
@@ -168,5 +169,49 @@ describe("parsePermitText - header extraction", () => {
     // 157350 lbs -> ~71372 kg
     expect(permit.truckProfile.grossWeightKg).toBeGreaterThan(71000);
     expect(permit.truckProfile.grossWeightKg).toBeLessThan(71800);
+  });
+});
+
+describe("parsePermitText - full 3-page TxDMV well servicing unit permit", () => {
+  const permit = parsePermitText(TX_WELL_SERVICING_PERMIT, "manual");
+  const { steps } = permit;
+
+  it("parses only the route table rows, in permit order", () => {
+    expect(steps.map((s) => s.road)).toEqual([
+      "FM 777", "FM 777", "US-190", "SH-63", "FM 1415", "SH-87", "SH-87", "SH-21",
+      "US-96", "US-59", "US-59", "US-59", "US-59", "US-59", "SH-43", "SH-43",
+      "LOOP 390", "LOOP 390",
+    ]);
+    expect(steps[steps.length - 1].action).toBe("end");
+  });
+
+  it("does not turn the header's Origin/Destination lines into waypoints ahead of the route", () => {
+    // A leaked "Destination: SL0390" before the first leg would route to the destination first.
+    expect(steps[0].rawText).toMatch(/^<0\.1 FM777 Head nw/);
+    expect(steps.some((s) => /Loaded Route|^Destination:|^Origin:/i.test(s.rawText))).toBe(false);
+  });
+
+  it("keeps the numbered general conditions out of the route", () => {
+    const leaked = steps.find((s) => /prohibited|Bridges:|authorize|deviate|WESTERN STAR/i.test(s.rawText));
+    expect(leaked).toBeUndefined();
+  });
+
+  it("reads '<0.1' leg distances and classifies 'Take ... Ramp' rows as exits", () => {
+    expect(steps[0].distanceMiles).toBeCloseTo(0.1);
+    const ramp = steps.find((s) => /Take SH43 Ramp/.test(s.rawText));
+    expect(ramp?.action).toBe("exit");
+    expect(ramp?.landmark).toBe("US-59 & SH-43");
+  });
+
+  it("extracts header, dimensions, and the axle count from the axle table", () => {
+    expect(permit.permitNumber).toBe("261003350991");
+    expect(permit.state).toBe("TX");
+    // 15' 5" = 4.699 m, 11' = 3.3528 m, 98' 5" = 29.997 m
+    expect(permit.truckProfile.heightMeters).toBeCloseTo(4.699, 3);
+    expect(permit.truckProfile.widthMeters).toBeCloseTo(3.3528, 3);
+    expect(permit.truckProfile.lengthMeters).toBeCloseTo(29.997, 2);
+    // 246000 lbs -> ~111584 kg
+    expect(permit.truckProfile.grossWeightKg).toBeCloseTo(111584, -1);
+    expect(permit.truckProfile.axleCount).toBe(12);
   });
 });
